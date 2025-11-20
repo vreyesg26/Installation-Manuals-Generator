@@ -307,7 +307,7 @@ function setInlineValueInCellByLabel(
       .replace(/\u00A0/g, " ");
     if (normalizeKey(txt).includes(normalizeKey(labelBase))) {
       // Sobrescribe el primer w:t de la celda con "Label: valor"
-      const firstT = xpNode(".//w:t[1]", tc);
+      //const firstT = xpNode(".//w:t[1]", tc);
       const labelPrefix = txt.includes(":")
         ? txt.split(":")[0] + ": "
         : labelCanon;

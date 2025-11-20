@@ -1,78 +1,71 @@
 import { useState } from "react";
-import { Button } from "./button";
-import { GitChangesModal } from "./GitChangesModal";
-import type { RepoStatus } from "@/types/git";
-import { Group } from "@mantine/core";
+import { Button } from "@mantine/core";
+import { IconBrandGithub, IconRefresh } from "@tabler/icons-react";
+import type { GithubChangesProps } from "@/types/manual";
 
-export default function GitChangesButton() {
-  const [opened, setOpened] = useState(false);
+export default function GitChangesButton({
+  onOpen,
+  onLoadingChange,
+}: GithubChangesProps) {
   const [loading, setLoading] = useState(false);
-  const [data, setData] = useState<RepoStatus[]>([]);
-  const [roots, setRoots] = useState<string[]>([]);
   const [repos, setRepos] = useState<string[]>([]);
 
-  const handleDiscover = async () => {
-    // protección por si el preload no cargó
-    if (!window.ipc?.chooseRoots) {
-      alert(
-        "El puente IPC (window.ipc) no está disponible. Revisa que preload.js esté apuntado correctamente en BrowserWindow."
-      );
-      return;
-    }
+  const setBusy = (v: boolean) => {
+    setLoading(v);
+    onLoadingChange?.(v);
+  };
 
-    setLoading(true);
+  const handlePickManual = async () => {
+    setBusy(true);
     try {
-      // 1) Elegir raíces (solo si no hay)
-      let r = roots;
-      if (!r.length) {
-        r = await window.ipc.chooseRoots();
-        setRoots(r);
-      }
-      if (!r.length) return;
+      const picks = await window.ipc.pickRepos();
+      const paths = (picks ?? []).map((p: any) => p.repoPath);
+      if (!paths.length) return;
+      setRepos(paths);
 
-      // 2) Descubrir repos bajo esas raíces
-      const found = await window.ipc.discover(r);
-      setRepos(found);
-
-      // 3) Escanear estados de esos repos
-      const statuses = await window.ipc.scan(found); // o scanDiscovered()
-      setData(statuses);
-      setOpened(true);
+      const statuses = await window.ipc.scan(paths);
+      onOpen({ statuses: statuses ?? [], repos: paths });
+    } catch (e: any) {
+      console.error(e);
+      alert(e?.message ?? String(e));
     } finally {
-      setLoading(false);
+      setBusy(false);
     }
   };
 
   const handleRescan = async () => {
     if (!repos.length) return;
-    setLoading(true);
+    setBusy(true);
     try {
       const statuses = await window.ipc.scan(repos);
-      setData(statuses);
+      console.log(statuses);
+      onOpen({ statuses: statuses ?? [], repos });
     } finally {
-      setLoading(false);
+      setBusy(false);
     }
   };
 
   return (
     <>
-      <Group gap="sm">
-        <Button onClick={handleDiscover} disabled={loading}>
-          {loading ? "Buscando repos…" : "Detectar cambios Git"}
+      <Button
+        leftSection={<IconBrandGithub size="1.1rem" />}
+        onClick={handlePickManual}
+        disabled={loading}
+        color="violet"
+      >
+        Github
+      </Button>
+      {repos.length > 0 && (
+        <Button
+          leftSection={<IconRefresh />}
+          onClick={handleRescan}
+          disabled={loading}
+          variant="outline"
+          color="violet"
+        >
+          Refrescar
         </Button>
-        {repos.length > 0 && (
-          <Button variant="outline" onClick={handleRescan} disabled={loading}>
-            Refrescar
-          </Button>
-        )}
-      </Group>
-
-      <GitChangesModal
-        opened={opened}
-        onClose={() => setOpened(false)}
-        data={data}
-        loading={loading}
-      />
+      )}
     </>
   );
 }

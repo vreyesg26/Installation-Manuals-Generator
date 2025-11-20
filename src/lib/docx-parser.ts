@@ -774,45 +774,45 @@ export async function parseDocxArrayBuffer(
   })();
 
   // src/lib/docx-parser.ts (añade esto cerca del final, antes del return)
-  function nk(s: string) {
-    return (s || "")
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/\s+/g, " ")
-      .trim();
-  }
-  function textDeep(cell: any): string {
-    const paras = Array.isArray(cell?.["w:p"])
-      ? cell["w:p"]
-      : cell?.["w:p"]
-      ? [cell["w:p"]]
-      : [];
-    const pickText = (p: any) => {
-      const runs = p?.["w:r"]
-        ? Array.isArray(p["w:r"])
-          ? p["w:r"]
-          : [p["w:r"]]
-        : [];
-      return runs
-        .map((r: any) => {
-          const t = r?.["w:t"];
-          if (typeof t === "string") return t;
-          if (t?.["#text"]) return t["#text"];
-          return "";
-        })
-        .join("");
-    };
-    return paras.map(pickText).join(" ").replace(/\s+/g, " ").trim();
-  }
-  function rowToTexts(tr: any): string[] {
-    const cells = Array.isArray(tr?.["w:tc"])
-      ? tr["w:tc"]
-      : tr?.["w:tc"]
-      ? [tr["w:tc"]]
-      : [];
-    return cells.map((tc: any) => textDeep(tc));
-  }
+  // function nk(s: string) {
+  //   return (s || "")
+  //     .toLowerCase()
+  //     .normalize("NFD")
+  //     .replace(/[\u0300-\u036f]/g, "")
+  //     .replace(/\s+/g, " ")
+  //     .trim();
+  // }
+  // function textDeep(cell: any): string {
+  //   const paras = Array.isArray(cell?.["w:p"])
+  //     ? cell["w:p"]
+  //     : cell?.["w:p"]
+  //     ? [cell["w:p"]]
+  //     : [];
+  //   const pickText = (p: any) => {
+  //     const runs = p?.["w:r"]
+  //       ? Array.isArray(p["w:r"])
+  //         ? p["w:r"]
+  //         : [p["w:r"]]
+  //       : [];
+  //     return runs
+  //       .map((r: any) => {
+  //         const t = r?.["w:t"];
+  //         if (typeof t === "string") return t;
+  //         if (t?.["#text"]) return t["#text"];
+  //         return "";
+  //       })
+  //       .join("");
+  //   };
+  //   return paras.map(pickText).join(" ").replace(/\s+/g, " ").trim();
+  // }
+  // function rowToTexts(tr: any): string[] {
+  //   const cells = Array.isArray(tr?.["w:tc"])
+  //     ? tr["w:tc"]
+  //     : tr?.["w:tc"]
+  //     ? [tr["w:tc"]]
+  //     : [];
+  //   return cells.map((tc: any) => textDeep(tc));
+  // }
   function findInfoGeneralTable(tables: any[][][]): any[][] | null {
     // Heurística: tabla que contenga "INFORMACIÓN GENERAL" o filas con "ID de Cambio:" y "*Tipo de Requerimiento:"
     for (const tbl of tables) {

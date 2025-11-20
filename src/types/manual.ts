@@ -1,4 +1,5 @@
-// src/types/manual.ts
+import type { RepoStatus } from "./git";
+
 export type FieldKind = "text" | "select" | "multiselect";
 
 export interface FieldOption {
@@ -6,14 +7,14 @@ export interface FieldOption {
   value: string;
 }
 
-export type FieldValue = string | string[]; // 👈 clave
+export type FieldValue = string | string[];
 
 export interface UIField {
-  key: string;                // id interno, p.ej. "id-cambio"
-  label: string;              // etiqueta visible
-  kind: FieldKind;            // "text" | "select" | "multiselect"
-  value: FieldValue;          // 👈 ahora puede ser string o string[]
-  options?: FieldOption[];    // usado por select y multiselect
+  key: string; 
+  label: string; 
+  kind: FieldKind;
+  value: FieldValue;
+  options?: FieldOption[];
 }
 
 export interface UISection {
@@ -44,7 +45,12 @@ export interface ManualExtract {
   raw: { paragraphs: string[]; tables: string[][][] };
 }
 
-export type GitStatus = "Nuevo" | "Modificado" | "Renombrado" | "Eliminado" | "Desconocido";
+export type GitStatus =
+  | "Nuevo"
+  | "Modificado"
+  | "Renombrado"
+  | "Eliminado"
+  | "Desconocido";
 
 export interface GitFileChange {
   path: string;
@@ -59,3 +65,23 @@ export interface RepoChanges {
   repoPath: string;
   files: GitFileChange[];
 }
+
+export type FeatureKey = "existing" | "import";
+
+export interface HomeFeatureProps {
+  key: FeatureKey;
+  title: string;
+  description: string;
+  icon: React.ElementType;
+}
+
+export interface StepsProps {
+  key: string;
+  label: string;
+  description: string;
+}
+
+export type GithubChangesProps = {
+  onOpen: (payload: { statuses: RepoStatus[]; repos: string[] }) => void;
+  onLoadingChange?: (loading: boolean) => void;
+};

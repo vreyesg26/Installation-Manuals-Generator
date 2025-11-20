@@ -42,3 +42,5 @@ declare global {
     // ⛔️ Eliminamos window.git para evitar confusión.
   }
 }
+
+//holaa

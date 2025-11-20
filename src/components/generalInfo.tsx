@@ -32,7 +32,7 @@ function Row({
   );
 }
 
-export function PiezasTable({
+export function GeneralInfo({
   grupo,
   onUpdate,
 }: {

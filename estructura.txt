@@ -1,0 +1,97 @@
+.
+├── .DS_Store
+├── .gitignore
+├── components.json
+├── desktopIcon.png
+├── dist-electron
+│   ├── gitDiscover.js
+│   ├── gitDiscover.js.map
+│   ├── gitService.js
+│   ├── gitService.js.map
+│   ├── main.js
+│   ├── main.js.map
+│   ├── preload.js
+│   ├── preload.js.map
+│   ├── util.js
+│   └── util.js.map
+├── dist-react
+│   ├── assets
+│   │   ├── index--0c8ZYwP.js
+│   │   ├── index-D8b4DHJx.css
+│   │   └── react-CHdo91hT.svg
+│   └── index.html
+├── electron-builder.json
+├── eslint.config.js
+├── estructura.txt
+├── index.html
+├── package-lock.json
+├── package.json
+├── postcss.config.cjs
+├── README.md
+├── src
+│   ├── .DS_Store
+│   ├── components
+│   │   ├── FieldsForm.tsx
+│   │   ├── generalInfo.tsx
+│   │   └── ui
+│   │       ├── button.tsx
+│   │       ├── card.tsx
+│   │       ├── checkbox.tsx
+│   │       ├── GitChangesButton.tsx
+│   │       ├── GitChangesModal.tsx
+│   │       ├── input.tsx
+│   │       └── label.tsx
+│   ├── context
+│   │   └── ManualContext.tsx
+│   ├── electron
+│   │   ├── gitDiscover.ts
+│   │   ├── gitService.ts
+│   │   ├── main.ts
+│   │   ├── preload.ts
+│   │   ├── tsconfig.json
+│   │   └── util.ts
+│   ├── hooks
+│   │   └── useManualManager.ts
+│   ├── lib
+│   │   ├── constants.ts
+│   │   ├── docx-parser.ts
+│   │   ├── docx-writer.ts
+│   │   └── utils.ts
+│   ├── types
+│   │   ├── git.d.ts
+│   │   ├── git.js
+│   │   ├── git.js.map
+│   │   ├── global.d.ts
+│   │   ├── manual.js
+│   │   ├── manual.js.map
+│   │   ├── manual.ts
+│   │   └── preload.d.ts
+│   └── ui
+│       ├── .DS_Store
+│       ├── App.css
+│       ├── App.tsx
+│       ├── assets
+│       │   ├── firedocs-logo.png
+│       │   ├── logo.png
+│       │   └── react.svg
+│       ├── components
+│       │   ├── HeaderMenu.module.css
+│       │   └── HeaderMenu.tsx
+│       ├── index.css
+│       ├── main.tsx
+│       ├── pages
+│       │   ├── HomePage.module.css
+│       │   ├── HomePage.tsx
+│       │   ├── steps
+│       │   │   ├── FirstStep.tsx
+│       │   │   └── SecondStep.tsx
+│       │   └── StepsPage.tsx
+│       ├── routes
+│       │   └── AppRoutes.tsx
+│       └── vite-env.d.ts
+├── tsconfig.app.json
+├── tsconfig.json
+├── tsconfig.node.json
+└── vite.config.ts
+
+18 directories, 77 files
