@@ -160,34 +160,77 @@ export async function parseDocxArrayBuffer(
 
   // 5) Detección de tablas de "Piezas detalladas"
   const piezasDetalladas: PiezasGrupo[] = [];
+  let detectedStructuredPiezas = false;
+
+  const isPiezasHeaderRow = (row: string[]) => {
+    const headers = row.map((h) => normalize(h));
+    const map = headersMapIndex(headers);
+    return map.nombre >= 0 && map.tipo >= 0 && map.estado >= 0;
+  };
+
+  const readGroupNameBeforeHeader = (table: string[][], headerIndex: number) => {
+    for (let k = headerIndex - 1; k >= Math.max(0, headerIndex - 5); k--) {
+      const row = (table[k] ?? []).map((c) => normalize(c)).filter(Boolean);
+      if (!row.length) continue;
+
+      const joined = row.join(" ");
+      if (/^listado de piezas detalladas/i.test(joined)) continue;
+
+      // Caso esperado del template: Middleware/OSB, Middleware/DB, Middleware/Vortex
+      const middlewareCell = row.find((c) => /middleware\s*\/\s*[-\w]+/i.test(c));
+      if (middlewareCell) return normalize(middlewareCell).replace(/\s*\/\s*/g, "/");
+
+      // Fallback: una sola celda no vacía arriba del header
+      if (row.length === 1) return row[0];
+    }
+    return "Piezas detalladas";
+  };
+
   for (const table of tables) {
     if (!table?.length) continue;
-    const headers = table[0].map((h) => normalize(h));
-    const map = headersMapIndex(headers);
-    const looksLikePiezas = map.nombre >= 0 && map.tipo >= 0 && map.estado >= 0;
 
-    if (looksLikePiezas) {
+    // Una tabla DOCX puede contener varios bloques de piezas con el mismo header.
+    for (let h = 0; h < table.length; h++) {
+      const headerRow = table[h] ?? [];
+      if (!isPiezasHeaderRow(headerRow)) continue;
+
+      const map = headersMapIndex(headerRow.map((cell) => normalize(cell)));
+      const grupo = readGroupNameBeforeHeader(table, h);
       const items: PiezasItem[] = [];
-      for (let i = 1; i < table.length; i++) {
+
+      for (let i = h + 1; i < table.length; i++) {
         const row = table[i] ?? [];
-        const nombre = row[map.nombre] ?? "";
-        const tipo = row[map.tipo] ?? "";
-        const estadoRaw = row[map.estado] ?? "";
+
+        // Termina el bloque si inicia otro header.
+        if (isPiezasHeaderRow(row)) break;
+
+        const rowNorm = row.map((c) => normalize(c)).filter(Boolean);
+        // Si aparece el siguiente título Middleware/... termina el grupo actual.
+        if (rowNorm.length === 1 && /middleware\s*\/\s*[-\w]+/i.test(rowNorm[0]))
+          break;
+
+        const nombre = normalize(row[map.nombre] ?? "");
+        const tipo = normalize(row[map.tipo] ?? "");
+        const estadoRaw = normalize(row[map.estado] ?? "");
         const estado = /nuevo/i.test(estadoRaw)
           ? "Nuevo"
           : /modificado/i.test(estadoRaw)
           ? "Modificado"
           : estadoRaw;
+
         if (nombre || tipo || estadoRaw) items.push({ nombre, tipo, estado });
       }
-      if (items.length)
-        piezasDetalladas.push({ grupo: "Piezas detalladas", items });
+
+      if (items.length) {
+        detectedStructuredPiezas = true;
+        piezasDetalladas.push({ grupo: normalize(grupo), items });
+      }
     }
   }
   // 5.1) Fallback para tablas de "Piezas detalladas" en formato VERTICAL (cabeceras apiladas)
   (function detectVerticalPiezas() {
-    // Evita duplicar si ya detectamos algo arriba
-    if (piezasDetalladas.length > 0) return;
+    // Evita duplicar si ya detectamos piezas estructuradas correctamente
+    if (detectedStructuredPiezas) return;
 
     const isHeaderToken = (s: string) =>
       /^nombre$/i.test(s) ||
@@ -284,6 +327,9 @@ export async function parseDocxArrayBuffer(
 
   // 5.2) EXTRA: Tablas de implementación "Paso | Objeto a instalar | Ruta ..." => extraer archivos como piezas
   (function detectInstallTables() {
+    // Si ya detectamos tablas de piezas con estructura clara, evitamos inferencias extra
+    // de tablas de implementación para no duplicar grupos (p.ej. OSB/DB repetidos).
+    if (detectedStructuredPiezas) return;
     // No duplica si ya hubo detecciones previas; si quieres mergear, quita este return
     // (Yo prefiero MERGEAR en vez de return: por eso no retorno si ya hay piezas)
     const KNOWN_EXTS = [
