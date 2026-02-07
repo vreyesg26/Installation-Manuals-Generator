@@ -3,19 +3,19 @@ import {
   Card,
   Center,
   Container,
+  Flex,
   Group,
   SimpleGrid,
   Text,
   Title,
-  useMantineTheme,
 } from "@mantine/core";
 import classes from "./HomePage.module.css";
 import { mainButtonsData } from "@/lib/constants";
 import { useNavigate } from "react-router-dom";
 import { useManual } from "@/context/ManualContext";
+import { mainColor } from "@/lib/utils";
 
 export default function HomePage() {
-  const theme = useMantineTheme();
   const navigate = useNavigate();
   const { handleOpen } = useManual();
 
@@ -33,7 +33,7 @@ export default function HomePage() {
       padding="xl"
       onClick={feature.key === "import" ? onImportClick : undefined}
     >
-      <feature.icon size={50} stroke={1.5} color={theme.colors.blue[6]} />
+      <feature.icon size={50} stroke={1.5} color={mainColor} />
       <Text fz="lg" fw={500} className={classes.cardTitle} mt="md">
         {feature.title}
       </Text>
@@ -46,11 +46,11 @@ export default function HomePage() {
   return (
     <Center style={{ minHeight: "100vh" }}>
       <Container strategy="grid" size="lg" py="xl" fluid>
-        <Group justify="center" gap='xs'>
-          <Badge variant="filled" size="lg">
+        <Group justify="center" gap="xs">
+          <Badge variant="filled" size="lg" color={mainColor}>
             FireDocs
           </Badge>
-          <Text size='sm'>Version beta 1.0</Text>
+          <Text size="sm">Version beta 1.0</Text>
         </Group>
 
         <Title order={2} className={classes.title} ta="center" mt="sm">
@@ -65,9 +65,16 @@ export default function HomePage() {
           cols={{ base: 1, sm: 1, md: 2, lg: 2 }}
           spacing="sm"
           mt={50}
+          mx="md"
         >
           {features}
         </SimpleGrid>
+        {/* <Group justify="center" gap="xs" mt="lg">
+          <Flex align='center' gap={4}>
+            <Text>Desarrollado por</Text>
+            <Text fw={700} c={mainColor}>Victor Reyes</Text>
+          </Flex>
+        </Group> */}
       </Container>
     </Center>
   );

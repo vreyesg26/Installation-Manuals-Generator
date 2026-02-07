@@ -7,13 +7,11 @@ type DiscoverOptions = {
 };
 
 export async function isGitRepo(dir: string): Promise<boolean> {
-  // .git carpeta
   try {
     const s = await fs.stat(join(dir, ".git"));
     if (s.isDirectory()) return true;
   } catch {}
 
-  // .git archivo (worktree)
   try {
     const s = await fs.stat(join(dir, ".git"));
     if (s.isFile()) {
@@ -54,7 +52,7 @@ export async function discoverGitRepos(
     const { dir, depth } = queue.shift()!;
     if (await isGitRepo(dir)) {
       found.add(dir);
-      continue; // no seguimos dentro de un repo
+      continue;
     }
     if (depth >= maxDepth) continue;
 

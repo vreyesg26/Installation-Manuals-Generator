@@ -1,6 +1,4 @@
 .
-├── .DS_Store
-├── .gitignore
 ├── components.json
 ├── desktopIcon.png
 ├── dist-electron
@@ -16,20 +14,20 @@
 │   └── util.js.map
 ├── dist-react
 │   ├── assets
-│   │   ├── index--0c8ZYwP.js
-│   │   ├── index-D8b4DHJx.css
-│   │   └── react-CHdo91hT.svg
+│   │   ├── firedocs-logo-L3ryq2iD.png
+│   │   ├── index-BMWNVVEt.js
+│   │   └── index-C3DbRMly.css
 │   └── index.html
 ├── electron-builder.json
 ├── eslint.config.js
 ├── estructura.txt
 ├── index.html
+├── nuevo.html
 ├── package-lock.json
 ├── package.json
 ├── postcss.config.cjs
 ├── README.md
 ├── src
-│   ├── .DS_Store
 │   ├── components
 │   │   ├── FieldsForm.tsx
 │   │   ├── generalInfo.tsx
@@ -55,6 +53,7 @@
 │   ├── lib
 │   │   ├── constants.ts
 │   │   ├── docx-parser.ts
+│   │   ├── docx-pieces-parser.ts
 │   │   ├── docx-writer.ts
 │   │   └── utils.ts
 │   ├── types
@@ -67,7 +66,6 @@
 │   │   ├── manual.ts
 │   │   └── preload.d.ts
 │   └── ui
-│       ├── .DS_Store
 │       ├── App.css
 │       ├── App.tsx
 │       ├── assets
@@ -94,4 +92,4 @@
 ├── tsconfig.node.json
 └── vite.config.ts
 
-18 directories, 77 files
+18 directories, 75 files

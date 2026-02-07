@@ -18,11 +18,14 @@ import {
   IconChevronRight,
   IconFileUpload,
 } from "@tabler/icons-react";
+import { useMediaQuery } from "@mantine/hooks";
+import { mainColor } from "@/lib/utils";
 
 export default function StepsPage() {
   const { data, sections, handleExport } = useManual();
   const [active, setActive] = useState(0);
   const completed = active === steps.length;
+  const isMediumScreen = useMediaQuery("(min-width: 1360px)");
 
   const percent = useMemo(
     () => Math.round((active / steps.length) * 100),
@@ -60,29 +63,32 @@ export default function StepsPage() {
         <Text c="dimmed">{percent}%</Text>
       </Group>
 
-      <Progress value={percent} size="lg" radius="xl" />
+      <Progress color={mainColor} value={percent} size="lg" radius="sm" />
 
-      <Box mt="xl" w="100%">
-        <Stepper
-          active={active}
-          onStepClick={setActive}
-          allowNextStepsSelect={false}
-        >
-          {steps.map((s, i) => (
-            <Stepper.Step key={i} label={s.label} />
-          ))}
+      {isMediumScreen && (
+        <Box mt="xl" w="100%">
+          <Stepper
+            active={active}
+            onStepClick={setActive}
+            allowNextStepsSelect={false}
+            color={mainColor}
+          >
+            {steps.map((s, i) => (
+              <Stepper.Step key={i} label={s.label} />
+            ))}
 
-          <Stepper.Completed>
-            <Text ta="center" c="dimmed">
-              Manual completado
-            </Text>
-          </Stepper.Completed>
-        </Stepper>
-      </Box>
+            <Stepper.Completed >
+              <Text ta="center" c="dimmed">
+                Manual completado
+              </Text>
+            </Stepper.Completed>
+          </Stepper>
+        </Box>
+      )}
 
       <Box mt="xl">{renderStepContent()}</Box>
 
-      <Group justify="space-between" mt="xl">
+      <Group justify="space-between" mt="xl" >
         <Button
           leftSection={<IconChevronLeft size="1.1rem" />}
           variant="default"
@@ -97,6 +103,7 @@ export default function StepsPage() {
             leftSection={<IconFileUpload size="1.1rem" />}
             onClick={handleExport}
             variant="outline"
+            color={mainColor}
           >
             Exportar
           </Button>
@@ -104,6 +111,7 @@ export default function StepsPage() {
             rightSection={<IconChevronRight size="1.1rem" />}
             onClick={next}
             disabled={completed}
+            color={mainColor}
           >
             {completed
               ? "Listo"

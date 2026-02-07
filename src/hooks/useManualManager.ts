@@ -5,6 +5,7 @@ import type {
   ManualExtract,
   UISection,
   UIField,
+  PiezasGrupo,
 } from "@/types/manual";
 import type { RepoStatus } from "@/types/git";
 import { countryOptions } from "@/lib/constants";
@@ -53,6 +54,8 @@ export function useManualManager() {
   const [gitModalOpen, setGitModalOpen] = useState(false);
   const [gitLoading, setGitLoading] = useState(false);
   const [gitData, setGitData] = useState<RepoStatus[]>([]);
+
+  const [detailedPieces, setDetailedPieces] = useState<PiezasGrupo[]>([]);
 
   async function handleOpen() {
     try {
@@ -175,6 +178,8 @@ export function useManualManager() {
       setData(parsed);
       setSections(norm);
 
+      setDetailedPieces(parsed.piezasDetalladas ?? []);
+
       return true;
     } catch (e: any) {
       alert(e.message ?? String(e));
@@ -194,12 +199,14 @@ export function useManualManager() {
   return {
     data,
     sections,
+    detailedPieces,
     templateBytes,
     gitModalOpen,
     gitLoading,
     gitData,
 
     setSections,
+    setDetailedPieces,
     setGitData,
     setGitModalOpen,
     setGitLoading,

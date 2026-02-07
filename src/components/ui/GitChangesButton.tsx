@@ -51,7 +51,7 @@ export default function GitChangesButton({
         leftSection={<IconBrandGithub size="1.1rem" />}
         onClick={handlePickManual}
         disabled={loading}
-        color="violet"
+        color="pink"
       >
         Github
       </Button>
@@ -61,7 +61,7 @@ export default function GitChangesButton({
           onClick={handleRescan}
           disabled={loading}
           variant="outline"
-          color="violet"
+          color="pink"
         >
           Refrescar
         </Button>
