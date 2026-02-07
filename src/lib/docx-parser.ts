@@ -160,16 +160,55 @@ export async function parseDocxArrayBuffer(
 
   // 5) Detección de tablas de "Piezas detalladas"
   const piezasDetalladas: PiezasGrupo[] = [];
+  let detectedStructuredPiezas = false;
+
+  const isPiezasHeaderRow = (row: string[]) => {
+    const map = headersMapIndex(row.map((h) => normalize(h)));
+    return map.nombre >= 0 && map.tipo >= 0 && map.estado >= 0;
+  };
+
+  const readGroupNameBeforeHeader = (table: string[][], headerIndex: number) => {
+    for (let k = headerIndex - 1; k >= Math.max(0, headerIndex - 4); k--) {
+      const row = (table[k] ?? []).map((c) => normalize(c)).filter(Boolean);
+      if (!row.length) continue;
+
+      // Evita tomar títulos globales del bloque como nombre de grupo
+      if (/^listado de piezas detalladas/i.test(row.join(" "))) continue;
+
+      // El nombre suele venir en una sola celda: Middleware/OSB, Middleware/DB, etc.
+      if (row.length === 1) return row[0];
+    }
+    return "Piezas detalladas";
+  };
+
+  const isRowCompletelyEmpty = (row: string[]) => row.every((c) => !normalize(c));
+
   for (const table of tables) {
     if (!table?.length) continue;
-    const headers = table[0].map((h) => normalize(h));
-    const map = headersMapIndex(headers);
-    const looksLikePiezas = map.nombre >= 0 && map.tipo >= 0 && map.estado >= 0;
 
-    if (looksLikePiezas) {
+    // Permite detectar múltiples bloques en una sola tabla:
+    // [titulo grupo] + [header Nombre/Tipo/Nuevo o Modificado] + [filas]
+    for (let h = 0; h < table.length; h++) {
+      const headerRow = table[h] ?? [];
+      if (!isPiezasHeaderRow(headerRow)) continue;
+
+      const headers = headerRow.map((cell) => normalize(cell));
+      const map = headersMapIndex(headers);
+      const grupo = readGroupNameBeforeHeader(table, h);
       const items: PiezasItem[] = [];
-      for (let i = 1; i < table.length; i++) {
+
+      for (let i = h + 1; i < table.length; i++) {
         const row = table[i] ?? [];
+
+        // Si arranca otro header de piezas, termina el bloque actual.
+        if (isPiezasHeaderRow(row)) break;
+
+        // Si aparece una fila tipo título de grupo y no trae datos tabulares, corta.
+        const rowNorm = row.map((c) => normalize(c));
+        const rowNonEmpty = rowNorm.filter(Boolean);
+        if (rowNonEmpty.length === 1 && /middleware\//i.test(rowNonEmpty[0])) break;
+        if (isRowCompletelyEmpty(rowNorm)) continue;
+
         const nombre = row[map.nombre] ?? "";
         const tipo = row[map.tipo] ?? "";
         const estadoRaw = row[map.estado] ?? "";
@@ -178,16 +217,27 @@ export async function parseDocxArrayBuffer(
           : /modificado/i.test(estadoRaw)
           ? "Modificado"
           : estadoRaw;
-        if (nombre || tipo || estadoRaw) items.push({ nombre, tipo, estado });
+
+        if (nombre || tipo || estadoRaw) {
+          items.push({
+            nombre: normalize(nombre),
+            tipo: normalize(tipo),
+            estado: normalize(estado),
+          });
+        }
       }
-      if (items.length)
-        piezasDetalladas.push({ grupo: "Piezas detalladas", items });
+
+      if (items.length) {
+        detectedStructuredPiezas = true;
+        piezasDetalladas.push({ grupo: normalize(grupo), items });
+      }
+
     }
   }
   // 5.1) Fallback para tablas de "Piezas detalladas" en formato VERTICAL (cabeceras apiladas)
   (function detectVerticalPiezas() {
-    // Evita duplicar si ya detectamos algo arriba
-    if (piezasDetalladas.length > 0) return;
+    // Evita duplicar si ya detectamos piezas estructuradas correctamente
+    if (detectedStructuredPiezas) return;
 
     const isHeaderToken = (s: string) =>
       /^nombre$/i.test(s) ||
@@ -284,6 +334,9 @@ export async function parseDocxArrayBuffer(
 
   // 5.2) EXTRA: Tablas de implementación "Paso | Objeto a instalar | Ruta ..." => extraer archivos como piezas
   (function detectInstallTables() {
+    // Si ya detectamos tablas de piezas con estructura clara, evitamos inferencias extra
+    // de tablas de implementación para no duplicar grupos (p.ej. OSB/DB repetidos).
+    if (detectedStructuredPiezas) return;
     // No duplica si ya hubo detecciones previas; si quieres mergear, quita este return
     // (Yo prefiero MERGEAR en vez de return: por eso no retorno si ya hay piezas)
     const KNOWN_EXTS = [
